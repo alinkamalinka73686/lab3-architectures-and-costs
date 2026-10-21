@@ -6,11 +6,8 @@ from thop import profile
 from models import get_models
 
 def hand_flops():
-    # MLP: ilk Linear 784 -> 256
     mlp_linear = 2 * 784 * 256
-    # CNN: ikinci Conv2d(16,32,3), cikis 14x14
     cnn_conv = 2 * 3 * 3 * 16 * 32 * 14 * 14
-    # Attention: bir MHA blogu, seq=16, d_model=64
     seq, d = 16, 64
     qkv = 2 * seq * d * 3 * d
     scores = 2 * seq**2 * d

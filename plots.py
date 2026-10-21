@@ -1,5 +1,6 @@
 import json
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from models import get_models
 from cost import measure_latency
 
@@ -30,11 +31,29 @@ def scatter(ax, xs, xlabel, title, logx=False):
     ax.grid(True, alpha=0.3)
 
 
-fig, axes = plt.subplots(1, 3, figsize=(16, 4.5))
+fig, axes = plt.subplots(1, 2, figsize=(11, 4.5))
+
+# Plot 1: accuracy vs parameters
 params = {n: results[n]["params"] for n in names}
 scatter(axes[0], params, "Parameters", "Accuracy vs parameters", logx=True)
-scatter(axes[1], lat1, "Latency, batch=1 (ms)", "Accuracy vs latency (batch 1)")
-scatter(axes[2], lat128, "Latency, batch=128 (ms)", "Accuracy vs latency (batch 128)")
+
+# Plot 2: accuracy vs latency (both batch sizes)
+ax = axes[1]
+for n in names:
+    acc = results[n]["test_acc"] * 100
+    ax.scatter(lat1[n], acc, s=120, color=colors[n], marker="o")
+    ax.scatter(lat128[n], acc, s=120, color=colors[n], marker="s")
+    ax.annotate(n, (lat128[n], acc), textcoords="offset points", xytext=(8, 6))
+ax.set_xscale("log")
+ax.set_xlabel("Latency (ms, log scale)")
+ax.set_ylabel("Test accuracy (%)")
+ax.set_title("Accuracy vs latency")
+ax.grid(True, alpha=0.3)
+ax.legend(handles=[
+    Line2D([], [], marker="o", color="gray", linestyle="", label="batch 1"),
+    Line2D([], [], marker="s", color="gray", linestyle="", label="batch 128"),
+])
+
 plt.tight_layout()
 plt.savefig("tradeoff.png", dpi=150)
 print("Saved tradeoff.png")

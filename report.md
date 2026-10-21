@@ -6,8 +6,34 @@ batch size 128. Training: Adam, lr 1e-3, 5 epochs. Latency measured on CPU
 (median of 100 runs for batch 1, 20 runs for batch 128, 10 warm-up runs).
 
 ## 2. Models and parameters (torchinfo)
+# Lab 3: Architectures and their Costs
+
+## 1. Setup
+Fashion-MNIST, Normalize((0.2860,), (0.3530,)), 55k train / 5k val / 10k test,
+batch size 128. Training: Adam, lr 1e-3, 5 epochs. Latency measured on CPU
+(median of 100 runs for batch 1, 20 runs for batch 128, 10 warm-up runs).
+
+## 2. Models and parameters (torchinfo)
 | Model     | Parameters | Test accuracy |
 |-----------|-----------:|--------------:|
+| MLP       | 235,146    | 88.20%        |
+| CNN       | 20,490     | 89.87%        |
+| Attention | 70,794     | 82.39%        |
+
+The 100k-150k target was not met: implementing the architectures exactly as
+specified gives 235k (MLP), 20k (CNN) and 71k (Attention) parameters.
+
+## 3. Hand-calculated vs measured FLOPs
+| Layer (hand calculation)         | Formula                              | FLOPs     |
+|----------------------------------|--------------------------------------|----------:|
+| MLP: Linear 784->256             | 2 x 784 x 256                        | 401,408   |
+| CNN: Conv2d(16,32,3), 14x14 out  | 2 x 3 x 3 x 16 x 32 x 14 x 14        | 1,806,336 |
+| Attention: one MHA block (seq=16, d=64) | QKV 393,216 + scores 32,768 + attn x V 32,768 + out proj 131,072 | 589,824 |
+
+| Model     | thop MACs | thop FLOPs (2 x MACs) |
+|-----------|----------:|----------------------:|
+| MLP       | 234,752   | 469,504               |
+| CNN       ||-----------|-----------:|--------------:|
 | MLP       | 235,146    | 88.20%        |
 | CNN       | 20,490     | 89.87%        |
 | Attention | 70,794     | 82.39%        |
